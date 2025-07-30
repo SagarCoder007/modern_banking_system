@@ -1,10 +1,10 @@
-services:
-  # PostgreSQL Database (Free tier supported)
-  - type: pserv
-    name: banking-postgres
-    env: postgres
+databases:
+  - name: banking-postgres
+    databaseName: bank
+    user: bankuser
     plan: free
 
+services:
   # Backend API Service
   - type: web
     name: banking-backend
@@ -19,8 +19,7 @@ services:
       - key: PORT
         value: 10000
       - key: DATABASE_URL
-        fromService:
-          type: pserv
+        fromDatabase:
           name: banking-postgres
           property: connectionString
       - key: JWT_SECRET
