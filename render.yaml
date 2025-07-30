@@ -1,0 +1,60 @@
+services:
+  # MySQL Database
+  - type: pserv
+    name: banking-mysql
+    env: docker
+    plan: free
+    dockerfilePath: ./database/Dockerfile
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1
+
+  # Backend API Service
+  - type: web
+    name: banking-backend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        value: banking-mysql
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: root
+      - key: DB_PASSWORD
+        value: bankingsystem2024
+      - key: DB_NAME
+        value: bank
+      - key: JWT_SECRET
+        value: banking_system_super_secure_jwt_key_2024_production_render_deployment
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
+      - key: CORS_ORIGIN
+        value: https://banking-frontend.onrender.com
+
+  # Frontend React App
+  - type: web
+    name: banking-frontend
+    env: static
+    plan: free
+    region: oregon
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://banking-backend.onrender.com/api
+
+disks:
+  - name: mysql-data
+    sizeGB: 1

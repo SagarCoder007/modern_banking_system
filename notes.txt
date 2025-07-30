@@ -1,0 +1,62 @@
+Here's the revised and properly formatted version of your assignment:
+
+---
+
+**📘 Assignment: Build a Simple Banking System**
+
+### 🎯 Objective
+
+Create a basic banking system using **Node.js** as the backend  **React.js** as the frontend, adhering to the **MVC (Model-View-Controller)** architecture, and using **MySQL** for the database.
+
+---
+
+### 🧱 Task Details
+
+#### 1. **Database Setup**
+
+* Create a database named `Bank` with the following tables:
+
+  * **Users**: Stores details of both bankers and customers.
+  * **Accounts**: Logs cash deposit and withdrawal transactions.
+
+#### 2. **Customer Login**
+
+* Design a login page with **username/email** and **password** fields.
+* On successful login, generate a **36-character alphanumeric access token**.
+* Use this token in the `Authorization` header for all protected API requests.
+
+#### 3. **Transactions Page (Customer Side)**
+
+* After login, redirect customers to a **Transactions** page.
+* Display all transaction records.
+* Include **Deposit** and **Withdraw** buttons:
+
+  * On click, show a popup with the available balance and a numeric input field.
+  * Update the balance accordingly.
+  * Show **"Insufficient Funds"** if withdrawal exceeds balance.
+
+#### 4. **Banker Login**
+
+* Provide a separate login page for **bankers**.
+* On login, redirect to an **Accounts** page showing all customer accounts.
+* Bankers can click on any user to view their **transaction history**.
+
+---
+
+### 📤 Submission Guidelines
+
+* Submit your project via a **GitHub repository link**.
+* Also provide a link to a **free live deployment** of your app for testing.
+
+---
+
+### ✅ Evaluation Criteria
+
+* **Functionality**: Does the system work as described?
+* **Code Quality**: Is the code clean, modular, and structured using MVC?
+* **Tech Stack Usage**: How effectively are PHP/Node.js and Vue.js/React.js integrated?
+* **User Experience**: Is the UI smooth and user-friendly for both roles?
+
+---
+
+Let me know if you want a sample schema or folder structure as well.
