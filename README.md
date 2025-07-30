@@ -1,6 +1,12 @@
 # 🏦 Banking System
 
 <img width="1896" height="902" alt="Image" src="https://github.com/user-attachments/assets/9cf37268-12bc-436e-802c-5a88c656720e" />
+<img width="1898" height="911" alt="Image" src="https://github.com/user-attachments/assets/7da18292-3888-476f-90ef-28fa4181ca11" />
+<img width="1918" height="910" alt="Image" src="https://github.com/user-attachments/assets/887d3e0f-0c5b-4f4c-bb48-0a1b55ae117c" />
+<img width="1918" height="910" alt="Image" src="https://github.com/user-attachments/assets/a82e8cab-de7c-4a8e-b29a-c5379521e2a5" />
+<img width="1895" height="895" alt="Image" src="https://github.com/user-attachments/assets/9fad1351-dc0f-4ca2-9e0d-d7d5d664bae7" />
+<img width="1918" height="906" alt="Image" src="https://github.com/user-attachments/assets/208f0482-d711-4bca-bfc5-88df257bf9af" />
+<img width="1918" height="913" alt="Image" src="https://github.com/user-attachments/assets/be921d7c-bc41-4e78-8ee3-6a038e959865" />
 A full-stack banking system built with **Node.js** (Backend), **React.js** (Frontend), and **MySQL** (Database) following the **MVC (Model-View-Controller)** architecture.
 
 ## 📋 Features
