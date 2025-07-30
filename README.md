@@ -1,5 +1,6 @@
 # 🏦 Banking System
 
+<img width="1896" height="902" alt="Image" src="https://github.com/user-attachments/assets/9cf37268-12bc-436e-802c-5a88c656720e" />
 A full-stack banking system built with **Node.js** (Backend), **React.js** (Frontend), and **MySQL** (Database) following the **MVC (Model-View-Controller)** architecture.
 
 ## 📋 Features
