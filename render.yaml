@@ -1,14 +1,9 @@
 services:
-  # MySQL Database
+  # PostgreSQL Database (Free tier supported)
   - type: pserv
-    name: banking-mysql
-    env: docker
+    name: banking-postgres
+    env: postgres
     plan: free
-    dockerfilePath: ./database/Dockerfile
-    disk:
-      name: mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 1
 
   # Backend API Service
   - type: web
@@ -25,15 +20,30 @@ services:
       - key: PORT
         value: 10000
       - key: DB_HOST
-        value: banking-mysql
+        fromService:
+          type: pserv
+          name: banking-postgres
+          property: host
       - key: DB_PORT
-        value: 3306
+        fromService:
+          type: pserv
+          name: banking-postgres
+          property: port
       - key: DB_USER
-        value: root
+        fromService:
+          type: pserv
+          name: banking-postgres
+          property: user
       - key: DB_PASSWORD
-        value: bankingsystem2024
+        fromService:
+          type: pserv
+          name: banking-postgres
+          property: password
       - key: DB_NAME
-        value: bank
+        fromService:
+          type: pserv
+          name: banking-postgres
+          property: database
       - key: JWT_SECRET
         value: banking_system_super_secure_jwt_key_2024_production_render_deployment
       - key: JWT_EXPIRES_IN
@@ -55,6 +65,3 @@ services:
       - key: REACT_APP_API_URL
         value: https://banking-backend.onrender.com/api
 
-disks:
-  - name: mysql-data
-    sizeGB: 1
