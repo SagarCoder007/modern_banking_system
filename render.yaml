@@ -10,7 +10,6 @@ services:
     name: banking-backend
     env: node
     plan: free
-    region: oregon
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     healthCheckPath: /
@@ -19,31 +18,11 @@ services:
         value: production
       - key: PORT
         value: 10000
-      - key: DB_HOST
+      - key: DATABASE_URL
         fromService:
           type: pserv
           name: banking-postgres
-          property: host
-      - key: DB_PORT
-        fromService:
-          type: pserv
-          name: banking-postgres
-          property: port
-      - key: DB_USER
-        fromService:
-          type: pserv
-          name: banking-postgres
-          property: user
-      - key: DB_PASSWORD
-        fromService:
-          type: pserv
-          name: banking-postgres
-          property: password
-      - key: DB_NAME
-        fromService:
-          type: pserv
-          name: banking-postgres
-          property: database
+          property: connectionString
       - key: JWT_SECRET
         value: banking_system_super_secure_jwt_key_2024_production_render_deployment
       - key: JWT_EXPIRES_IN
@@ -58,7 +37,6 @@ services:
     name: banking-frontend
     env: static
     plan: free
-    region: oregon
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
     envVars:

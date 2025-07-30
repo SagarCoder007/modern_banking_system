@@ -27,8 +27,17 @@ app.get('/', (req, res) => {
 });
 
 // Test database connection on startup
-const { testConnection } = require('./config/database');
+const { testConnection, isPostgreSQL } = require('./config/database');
 testConnection();
+
+// Initialize database schema for PostgreSQL in production
+if (isPostgreSQL && process.env.NODE_ENV === 'production') {
+  const { initializeDatabase } = require('./scripts/init-db');
+  initializeDatabase().catch(error => {
+    console.error('Database initialization failed:', error);
+    // Don't exit the process, let the server start anyway
+  });
+}
 
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
