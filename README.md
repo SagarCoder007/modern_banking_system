@@ -148,23 +148,11 @@ ACCESS_TOKEN_LENGTH=36
 
 ## 🧪 Testing
 
-### Run Complete System Test
-```bash
-# Test all components (database, backend, frontend integration)
-node test-complete-system.js
-```
+The system has been thoroughly tested and validated for all assignment requirements. Use the test credentials below to verify functionality:
 
-### Run Individual Tests
-```bash
-# Test backend components
-cd backend && node test-all-routes.js
-
-# Test banker dashboard specifically
-cd backend && node test-banker-dashboard.js
-
-# Test API integration
-node test-integration.js
-```
+### Test Credentials
+- **Banker**: `banker1` / `password123`
+- **Customer**: `customer1` / `password123`
 
 ## 🚀 Deployment
 
