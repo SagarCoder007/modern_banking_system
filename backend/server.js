@@ -38,10 +38,11 @@ testConnection();
 
 // Initialize database schema for PostgreSQL in production
 if (isPostgreSQL && process.env.NODE_ENV === 'production') {
+  console.log('🔄 Initializing PostgreSQL database for production...');
   const { initializeDatabase } = require('./scripts/init-db');
   initializeDatabase().catch(error => {
-    console.error('Database initialization failed:', error);
-    // Don't exit the process, let the server start anyway
+    console.error('❌ Database initialization failed:', error);
+    // Continue anyway - tables might already exist
   });
 }
 

@@ -15,6 +15,7 @@
     "build": "cd frontend && npm install && npm run build",
     "build:backend": "cd backend && npm install --production",
     "install:all": "npm install && cd backend && npm install && cd frontend && npm install",
+    "db:init": "cd backend && node scripts/init-db.js",
     "test": "cd backend && npm test",
     "postinstall": "npm run install:all",
     "heroku-postbuild": "npm run build",
