@@ -121,11 +121,36 @@ async function initializeDatabase() {
             const seedSQL = fs.readFileSync(seedPath, 'utf8');
             console.log('🌱 Inserting seed data...');
             
-            // Split seed SQL into statements
-            const seedStatements = seedSQL
-                .split(';')
-                .map(stmt => stmt.trim())
-                .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.match(/^\s*$/));
+            // Better parsing for seed statements (similar to schema parsing)
+            const seedStatements = [];
+            let currentSeedStatement = '';
+            
+            const seedLines = seedSQL.split('\n');
+            
+            for (const line of seedLines) {
+                const trimmedLine = line.trim();
+                
+                // Skip comments and empty lines
+                if (trimmedLine.startsWith('--') || trimmedLine === '') {
+                    continue;
+                }
+                
+                currentSeedStatement += line + '\n';
+                
+                // End of statement (semicolon)
+                if (trimmedLine.endsWith(';')) {
+                    const cleanStatement = currentSeedStatement.trim();
+                    if (cleanStatement && !cleanStatement.startsWith('--')) {
+                        seedStatements.push(cleanStatement);
+                    }
+                    currentSeedStatement = '';
+                }
+            }
+            
+            // Add any remaining statement
+            if (currentSeedStatement.trim()) {
+                seedStatements.push(currentSeedStatement.trim());
+            }
             
             console.log('📊 Found', seedStatements.length, 'seed statements to execute');
             
