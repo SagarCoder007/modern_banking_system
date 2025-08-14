@@ -136,11 +136,5 @@ CREATE TRIGGER generate_reference_number_trigger
     FOR EACH ROW
     EXECUTE FUNCTION generate_reference_number();
 
--- Show tables
-\dt
-
--- Display table structures
-\d users;
-\d accounts;
-\d transactions;
-\d accesstokens;
+-- Tables created successfully
+-- You can view tables with: SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';

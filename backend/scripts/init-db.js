@@ -50,11 +50,53 @@ async function initializeDatabase() {
         console.log('📋 Creating database schema...');
         console.log('📄 Schema file size:', schemaSQL.length, 'characters');
         
-        // Split SQL into individual statements and execute one by one
-        const statements = schemaSQL
-            .split(';')
-            .map(stmt => stmt.trim())
-            .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.match(/^\s*$/));
+        // Better SQL parsing for PostgreSQL functions
+        const statements = [];
+        let currentStatement = '';
+        let insideFunction = false;
+        let dollarTagCount = 0;
+        
+        const lines = schemaSQL.split('\n');
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            // Skip comments and empty lines
+            if (trimmedLine.startsWith('--') || trimmedLine === '') {
+                continue;
+            }
+            
+            // Skip PostgreSQL metacommands
+            if (trimmedLine.startsWith('\\')) {
+                continue;
+            }
+            
+            currentStatement += line + '\n';
+            
+            // Track dollar-quoted functions
+            if (trimmedLine.includes('$$')) {
+                dollarTagCount++;
+                if (dollarTagCount % 2 === 1) {
+                    insideFunction = true;
+                } else {
+                    insideFunction = false;
+                }
+            }
+            
+            // End of statement (semicolon and not inside function)
+            if (trimmedLine.endsWith(';') && !insideFunction) {
+                const cleanStatement = currentStatement.trim();
+                if (cleanStatement && !cleanStatement.startsWith('--')) {
+                    statements.push(cleanStatement);
+                }
+                currentStatement = '';
+            }
+        }
+        
+        // Add any remaining statement
+        if (currentStatement.trim()) {
+            statements.push(currentStatement.trim());
+        }
         
         console.log('📊 Found', statements.length, 'SQL statements to execute');
         
