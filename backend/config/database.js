@@ -61,6 +61,42 @@ const query = async (text, params = []) => {
   }
 };
 
+// Unified execute interface (for backward compatibility)
+const execute = async (text, params = []) => {
+  if (isPostgreSQL) {
+    // Convert MySQL ? placeholders to PostgreSQL $1, $2, etc.
+    let pgQuery = text;
+    let paramIndex = 1;
+    pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
+    
+    // Add RETURNING id for INSERT statements
+    if (pgQuery.toUpperCase().includes('INSERT INTO') && !pgQuery.toUpperCase().includes('RETURNING')) {
+      pgQuery = pgQuery.replace(/;?\s*$/, ' RETURNING id');
+    }
+    
+    const client = await pool.connect();
+    try {
+      const result = await client.query(pgQuery, params);
+      
+      // Return format compatible with MySQL
+      if (pgQuery.toUpperCase().includes('INSERT INTO')) {
+        return [result.rows, { insertId: result.rows[0]?.id }];
+      } else {
+        return [result.rows];
+      }
+    } finally {
+      client.release();
+    }
+  } else {
+    return await pool.execute(text, params);
+  }
+};
+
+// Add execute method to pool for unified interface
+if (isPostgreSQL) {
+  pool.execute = execute;
+}
+
 // Test database connection
 const testConnection = async () => {
   try {
@@ -81,6 +117,7 @@ const testConnection = async () => {
 module.exports = {
   pool,
   query,
+  execute,
   testConnection,
   isPostgreSQL
 }; 
