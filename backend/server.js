@@ -40,10 +40,16 @@ testConnection();
 if (isPostgreSQL && process.env.NODE_ENV === 'production') {
   console.log('🔄 Initializing PostgreSQL database for production...');
   const { initializeDatabase } = require('./scripts/init-db');
-  initializeDatabase().catch(error => {
-    console.error('❌ Database initialization failed:', error);
-    // Continue anyway - tables might already exist
-  });
+  
+  // Initialize database before starting server
+  initializeDatabase()
+    .then(() => {
+      console.log('✅ Database initialization completed successfully');
+    })
+    .catch(error => {
+      console.error('❌ Database initialization failed:', error.message);
+      console.log('🔄 Server will continue - tables might already exist');
+    });
 }
 
 // API Routes

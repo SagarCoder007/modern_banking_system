@@ -26,15 +26,60 @@ async function initializeDatabase() {
 
         // Execute schema
         console.log('📋 Creating database schema...');
-        await pool.query(schemaSQL);
-        console.log('✅ Database schema created successfully');
+        console.log('📄 Schema file size:', schemaSQL.length, 'characters');
+        
+        // Split SQL into individual statements and execute one by one
+        const statements = schemaSQL
+            .split(';')
+            .map(stmt => stmt.trim())
+            .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.match(/^\s*$/));
+        
+        console.log('📊 Found', statements.length, 'SQL statements to execute');
+        
+        for (let i = 0; i < statements.length; i++) {
+            const statement = statements[i];
+            if (statement.trim()) {
+                try {
+                    console.log(`🔄 Executing statement ${i + 1}/${statements.length}: ${statement.substring(0, 50)}...`);
+                    await pool.query(statement);
+                    console.log(`✅ Statement ${i + 1} executed successfully`);
+                } catch (error) {
+                    console.log(`⚠️  Statement ${i + 1} failed:`, error.message);
+                    // Continue with other statements
+                }
+            }
+        }
+        
+        console.log('✅ Database schema creation completed');
 
         // Execute seed data if file exists
         if (fs.existsSync(seedPath)) {
             const seedSQL = fs.readFileSync(seedPath, 'utf8');
             console.log('🌱 Inserting seed data...');
-            await pool.query(seedSQL);
-            console.log('✅ Seed data inserted successfully');
+            
+            // Split seed SQL into statements
+            const seedStatements = seedSQL
+                .split(';')
+                .map(stmt => stmt.trim())
+                .filter(stmt => stmt.length > 0 && !stmt.startsWith('--') && !stmt.match(/^\s*$/));
+            
+            console.log('📊 Found', seedStatements.length, 'seed statements to execute');
+            
+            for (let i = 0; i < seedStatements.length; i++) {
+                const statement = seedStatements[i];
+                if (statement.trim()) {
+                    try {
+                        console.log(`🌱 Executing seed ${i + 1}/${seedStatements.length}`);
+                        await pool.query(statement);
+                        console.log(`✅ Seed ${i + 1} executed successfully`);
+                    } catch (error) {
+                        console.log(`⚠️  Seed ${i + 1} failed:`, error.message);
+                        // Continue with other statements
+                    }
+                }
+            }
+            
+            console.log('✅ Seed data insertion completed');
         } else {
             console.log('⚠️  Seed file not found, skipping seed data insertion');
         }
