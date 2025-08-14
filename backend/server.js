@@ -36,6 +36,50 @@ app.get('/', (req, res) => {
 const { testConnection, isPostgreSQL } = require('./config/database');
 testConnection();
 
+// Function to insert demo data
+async function insertDemoData() {
+  const { Pool } = require('pg');
+  const bcrypt = require('bcryptjs');
+  
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+
+  try {
+    // Generate hash for password123
+    const passwordHash = await bcrypt.hash('password123', 12);
+    console.log('🔐 Generated password hash for demo users');
+    
+    // Insert demo users with fresh hash
+    await pool.query(`
+      INSERT INTO users (username, email, password, role, first_name, last_name, phone) VALUES
+      ('banker1', 'banker@bank.com', $1, 'banker', 'John', 'Banker', '1234567890'),
+      ('customer1', 'alice@email.com', $1, 'customer', 'Alice', 'Johnson', '1234567891'),
+      ('customer2', 'bob@email.com', $1, 'customer', 'Bob', 'Smith', '1234567892'),
+      ('customer3', 'carol@email.com', $1, 'customer', 'Carol', 'Davis', '1234567893')
+      ON CONFLICT (username) DO NOTHING
+    `, [passwordHash]);
+    console.log('✅ Demo users inserted with fresh password hash');
+
+    // Insert demo accounts
+    await pool.query(`
+      INSERT INTO accounts (user_id, account_number, balance, account_type) VALUES
+      (2, 'ACC001000001', 5000.00, 'savings'),
+      (3, 'ACC001000002', 3500.50, 'checking'),
+      (4, 'ACC001000003', 10000.75, 'savings')
+      ON CONFLICT (account_number) DO NOTHING
+    `);
+    console.log('✅ Demo accounts inserted');
+
+  } catch (error) {
+    console.error('⚠️  Demo data insertion failed:', error.message);
+    // Don't throw - continue even if demo data fails
+  } finally {
+    await pool.end();
+  }
+}
+
 // Initialize database schema for PostgreSQL in production
 if (isPostgreSQL && process.env.NODE_ENV === 'production') {
   console.log('🔄 Initializing PostgreSQL database for production...');
@@ -45,6 +89,13 @@ if (isPostgreSQL && process.env.NODE_ENV === 'production') {
   initializeDatabase()
     .then(() => {
       console.log('✅ Database initialization completed successfully');
+      
+      // Insert demo data after schema creation
+      console.log('🌱 Inserting demo users and accounts...');
+      return insertDemoData();
+    })
+    .then(() => {
+      console.log('✅ Demo data insertion completed successfully');
     })
     .catch(error => {
       console.error('❌ Database initialization failed:', error.message);
