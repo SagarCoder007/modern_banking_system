@@ -5,6 +5,9 @@ const { Pool } = require('pg');
 // Database initialization script for PostgreSQL on Render
 async function initializeDatabase() {
     console.log('🔄 Starting database initialization...');
+    console.log('📍 Current working directory:', process.cwd());
+    console.log('📍 Script directory:', __dirname);
+    console.log('🔗 DATABASE_URL exists:', !!process.env.DATABASE_URL);
 
     try {
         // Connect to PostgreSQL using DATABASE_URL
@@ -12,13 +15,32 @@ async function initializeDatabase() {
             connectionString: process.env.DATABASE_URL,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         });
+        
+        // Test connection
+        console.log('🔌 Testing database connection...');
+        const client = await pool.connect();
+        console.log('✅ Database connection successful');
+        client.release();
 
         // Read PostgreSQL schema file
         const schemaPath = path.join(__dirname, '../../database/postgresql-schema.sql');
         const seedPath = path.join(__dirname, '../../database/postgresql-seed.sql');
+        
+        console.log('📁 Schema path:', schemaPath);
+        console.log('📁 Seed path:', seedPath);
+        console.log('📋 Schema file exists:', fs.existsSync(schemaPath));
+        console.log('🌱 Seed file exists:', fs.existsSync(seedPath));
 
         if (!fs.existsSync(schemaPath)) {
-            console.log('⚠️  PostgreSQL schema file not found, skipping database initialization');
+            console.log('⚠️  PostgreSQL schema file not found at:', schemaPath);
+            console.log('📂 Available files in database directory:');
+            try {
+                const dbDir = path.join(__dirname, '../../database');
+                const files = fs.readdirSync(dbDir);
+                files.forEach(file => console.log('  -', file));
+            } catch (err) {
+                console.log('❌ Cannot read database directory');
+            }
             return;
         }
 
