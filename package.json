@@ -1,4 +1,37 @@
 {
+  "name": "banking-system-unified",
+  "version": "1.0.0",
+  "description": "Unified Banking System with Node.js Backend serving React Frontend",
+  "main": "backend/server.js",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "cd frontend && npm install && npm run build",
+    "build:backend": "cd backend && npm install --production",
+    "install:all": "npm install && cd backend && npm install && cd frontend && npm install",
+    "test": "cd backend && npm test",
+    "postinstall": "npm run install:all",
+    "heroku-postbuild": "npm run build",
+    "railway-deploy": "npm run build",
+    "render-build": "npm run build"
+  },
+  "keywords": [
+    "banking",
+    "nodejs",
+    "react",
+    "express",
+    "mysql",
+    "fullstack",
+    "unified"
+  ],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -6,6 +39,10 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.3",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

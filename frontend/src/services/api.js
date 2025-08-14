@@ -9,8 +9,9 @@ try {
   console.log('Security utilities not available, using defaults');
 }
 
-// API Base Configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// API Base Configuration - supports unified deployment
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api');
 
 // Create axios instance
 const api = axios.create({

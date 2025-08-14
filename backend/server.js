@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
@@ -12,6 +13,11 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from React build in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+}
 
 // Basic route
 app.get('/', (req, res) => {
@@ -54,10 +60,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'API endpoint not found' });
-});
+// Serve React app for any non-API routes in production
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  });
+} else {
+  // 404 handler for development
+  app.use('*', (req, res) => {
+    res.status(404).json({ message: 'API endpoint not found' });
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Banking System API running on port ${PORT}`);
