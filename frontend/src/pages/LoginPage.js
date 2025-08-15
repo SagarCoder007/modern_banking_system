@@ -63,20 +63,49 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log('🔄 Frontend: Form submitted - preventing default');
     e.preventDefault();
+    e.stopPropagation();
     
+    // Additional validation
     if (!formData.username || !formData.password) {
+      console.log('❌ Frontend: Validation failed - empty fields');
       setError('Please fill in all fields');
-      return;
+      setLoading(false);
+      return false;
     }
+
+    if (formData.username.trim().length < 3) {
+      console.log('❌ Frontend: Validation failed - username too short');
+      setError('Username must be at least 3 characters');
+      setLoading(false);
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      console.log('❌ Frontend: Validation failed - password too short');
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return false;
+    }
+
+    console.log('📤 Frontend: Making login request with:', { 
+      username: formData.username.trim(), 
+      passwordLength: formData.password.length 
+    });
 
     setLoading(true);
     setError('');
 
     try {
-      const result = await login(formData);
+      const result = await login({
+        username: formData.username.trim(),
+        password: formData.password
+      });
+      console.log('📥 Frontend: Login response:', result);
       
       if (result.success && result.user) {
+        console.log('✅ Frontend: Login successful, redirecting user:', result.user.username);
         // Successful login - redirect based on role
         const redirectTo = result.user.role === 'customer' 
           ? '/customer/dashboard' 
@@ -87,14 +116,22 @@ const LoginPage = () => {
           navigate(redirectTo, { replace: true });
         }, 100);
       } else {
-        setError(result.message || 'Login failed');
+        console.log('❌ Frontend: Login failed with message:', result.message);
+        setError(result.message || 'Invalid username or password');
+        // Ensure form doesn't submit
+        return false;
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      console.error('❌ Frontend: Login error:', error);
+      setError('Connection error. Please check your internet and try again.');
+      // Ensure form doesn't submit
+      return false;
     } finally {
       setLoading(false);
     }
+    
+    // Ensure form doesn't submit
+    return false;
   };
 
   const fillDemoCredentials = () => {
@@ -188,7 +225,7 @@ const LoginPage = () => {
               </Tabs>
 
               {/* Login Form */}
-              <Box component="form" onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} noValidate>
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>
                     {error}
@@ -245,6 +282,13 @@ const LoginPage = () => {
                   variant="contained"
                   size="large"
                   disabled={loading}
+                  onClick={(e) => {
+                    console.log('🖱️  Frontend: Login button clicked');
+                    if (loading) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
                   sx={{
                     mt: 3,
                     mb: 2,
@@ -300,7 +344,7 @@ const LoginPage = () => {
                     )}
                   </Typography>
                 </Box>
-              </Box>
+              </form>
             </CardContent>
           </Paper>
         </Fade>

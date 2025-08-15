@@ -72,8 +72,18 @@ export const apiService = {
   // Authentication APIs
   auth: {
     login: async (credentials) => {
+      console.log('🌐 API: Making login request to:', `${API_BASE_URL}/auth/login`);
+      console.log('📤 API: Request payload:', { 
+        username: credentials.username, 
+        passwordLength: credentials.password?.length 
+      });
+      
       const response = await api.post('/auth/login', credentials);
+      console.log('📥 API: Response status:', response.status);
+      console.log('📥 API: Response data:', response.data);
+      
       if (response.data.success && response.data.data.token) {
+        console.log('🔐 API: Setting token in localStorage');
         setToken(response.data.data.token.token);
       }
       return response.data;

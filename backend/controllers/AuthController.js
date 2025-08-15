@@ -15,23 +15,29 @@ class AuthController {
                 });
             }
             
-            // Find user by username or email
-            const user = await User.findByCredentials(username);
-            if (!user) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Invalid username or password'
-                });
-            }
-            
-            // Verify password
-            const isValidPassword = await user.verifyPassword(password);
-            if (!isValidPassword) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Invalid username or password'
-                });
-            }
+                    // Find user by username or email
+        console.log('🔍 AuthController: Attempting login for username:', username);
+        const user = await User.findByCredentials(username);
+        if (!user) {
+            console.log('❌ AuthController: User not found for username:', username);
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid username or password'
+            });
+        }
+        
+        console.log('👤 AuthController: User found, verifying password...');
+        // Verify password
+        const isValidPassword = await user.verifyPassword(password);
+        if (!isValidPassword) {
+            console.log('❌ AuthController: Password verification failed for user:', username);
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid username or password'
+            });
+        }
+        
+        console.log('✅ AuthController: Login successful for user:', username);
             
             // Generate 36-character access token
             const tokenExpiresIn = parseInt(process.env.TOKEN_EXPIRES_IN) / 3600 || 24; // Convert seconds to hours

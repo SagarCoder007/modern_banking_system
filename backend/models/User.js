@@ -81,13 +81,20 @@ class User {
     // Find user by username or email (for login)
     static async findByCredentials(identifier) {
         try {
+            console.log('🔍 Looking for user with identifier:', identifier);
             const [rows] = await pool.execute(
                 'SELECT * FROM users WHERE username = ? OR email = ?',
                 [identifier, identifier]
             );
             
+            console.log('📊 Found', rows.length, 'user(s) with identifier:', identifier);
+            if (rows.length > 0) {
+                console.log('👤 Found user:', rows[0].username, 'with role:', rows[0].role);
+            }
+            
             return rows.length > 0 ? new User(rows[0]) : null;
         } catch (error) {
+            console.error('❌ Error in findByCredentials:', error.message);
             throw error;
         }
     }
@@ -95,8 +102,16 @@ class User {
     // Verify password
     async verifyPassword(password) {
         try {
-            return await bcrypt.compare(password, this.password);
+            console.log('🔐 Verifying password for user:', this.username);
+            console.log('🔑 Input password length:', password.length);
+            console.log('🗝️  Stored hash length:', this.password.length);
+            
+            const isValid = await bcrypt.compare(password, this.password);
+            console.log('✅ Password verification result:', isValid);
+            
+            return isValid;
         } catch (error) {
+            console.error('❌ Password verification error:', error.message);
             throw error;
         }
     }
