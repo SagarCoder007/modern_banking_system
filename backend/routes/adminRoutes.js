@@ -24,8 +24,8 @@ router.post('/init-database', async (req, res) => {
     }
 });
 
-// Insert seed data manually
-router.post('/insert-seed', async (req, res) => {
+// Insert seed data manually (both GET and POST for browser testing)
+const insertSeedHandler = async (req, res) => {
     try {
         const { Pool } = require('pg');
         const pool = new Pool({
@@ -33,17 +33,42 @@ router.post('/insert-seed', async (req, res) => {
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         });
 
-        // Insert demo users with proper bcrypt hashes
-        const insertUsers = `
-            INSERT INTO users (username, email, password, role, first_name, last_name, phone) VALUES
-            ('banker1', 'banker@bank.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewgO8QujOZ7jJAKC', 'banker', 'John', 'Banker', '1234567890'),
-            ('customer1', 'alice@email.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewgO8QujOZ7jJAKC', 'customer', 'Alice', 'Johnson', '1234567891'),
-            ('customer2', 'bob@email.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewgO8QujOZ7jJAKC', 'customer', 'Bob', 'Smith', '1234567892'),
-            ('customer3', 'carol@email.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewgO8QujOZ7jJAKC', 'customer', 'Carol', 'Davis', '1234567893')
-            ON CONFLICT (username) DO NOTHING
-        `;
+        // Generate fresh hash for password123
+        const bcrypt = require('bcryptjs');
+        const passwordHash = await bcrypt.hash('password123', 12);
+        console.log('🔐 Generated fresh password hash for password123');
 
-        await pool.query(insertUsers);
+        // FORCE UPDATE existing users with fresh password hash
+        await pool.query(`
+            UPDATE users SET password = $1 WHERE username = 'banker1'
+        `, [passwordHash]);
+        
+        await pool.query(`
+            UPDATE users SET password = $1 WHERE username = 'customer1'
+        `, [passwordHash]);
+        
+        await pool.query(`
+            UPDATE users SET password = $1 WHERE username = 'customer2'
+        `, [passwordHash]);
+        
+        await pool.query(`
+            UPDATE users SET password = $1 WHERE username = 'customer3'
+        `, [passwordHash]);
+
+        console.log('✅ FORCED password updates for all demo users');
+        
+        // Verify the password updates worked
+        const verifyResult = await pool.query(`
+            SELECT username, SUBSTRING(password, 1, 10) as password_preview, LENGTH(password) as password_length
+            FROM users 
+            WHERE username IN ('banker1', 'customer1', 'customer2', 'customer3')
+            ORDER BY username
+        `);
+        
+        console.log('🔍 Password verification after update:');
+        verifyResult.rows.forEach(user => {
+            console.log(`  ${user.username}: ${user.password_preview}... (length: ${user.password_length})`);
+        });
 
         // Insert demo accounts
         const insertAccounts = `
@@ -75,6 +100,16 @@ router.post('/insert-seed', async (req, res) => {
             error: error.message
         });
     }
+};
+
+// Allow both GET and POST for browser testing
+router.get('/insert-seed', insertSeedHandler);
+router.post('/insert-seed', insertSeedHandler);
+
+// Browser-friendly version that forces JSON content type
+router.get('/seed', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    await insertSeedHandler(req, res);
 });
 
 // Check what users exist in database
