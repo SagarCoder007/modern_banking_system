@@ -77,6 +77,42 @@ router.post('/insert-seed', async (req, res) => {
     }
 });
 
+// Check what users exist in database
+router.get('/check-users', async (req, res) => {
+    try {
+        const { Pool } = require('pg');
+        const pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        });
+
+        const result = await pool.query(`
+            SELECT id, username, email, role, created_at, 
+                   LENGTH(password) as password_length,
+                   SUBSTRING(password, 1, 10) as password_preview
+            FROM users 
+            ORDER BY id
+        `);
+
+        await pool.end();
+
+        res.json({
+            success: true,
+            users: result.rows,
+            message: `Found ${result.rows.length} users in database`,
+            note: "password_preview shows first 10 characters of hash for verification"
+        });
+    } catch (error) {
+        console.error('❌ Failed to check users:', error);
+        
+        res.status(500).json({
+            success: false,
+            message: 'Failed to check users',
+            error: error.message
+        });
+    }
+});
+
 // Check if tables exist
 router.get('/check-tables', async (req, res) => {
     try {

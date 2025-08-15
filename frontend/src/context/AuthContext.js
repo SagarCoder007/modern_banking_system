@@ -42,34 +42,38 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
+      console.log('🔐 AuthContext: Starting login process');
       setLoading(true);
       const response = await apiService.auth.login(credentials);
+      console.log('🔐 AuthContext: API response received:', response);
       
       if (response.success && response.data.user) {
+        console.log('✅ AuthContext: Login successful, setting user state');
         // Set user data and authentication state
         setUser(response.data.user);
         setIsAuthenticated(true);
         
-
-        
+        console.log('✅ AuthContext: Returning success response');
         return { 
           success: true, 
           user: response.data.user,
           role: response.data.user.role 
         };
       } else {
+        console.log('❌ AuthContext: Login failed, returning error response');
         return { 
           success: false, 
           message: response.message || 'Login failed' 
         };
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ AuthContext: Login error caught:', error);
       return { 
         success: false, 
         message: utils.handleApiError(error) 
       };
     } finally {
+      console.log('🏁 AuthContext: Login process completed, setting loading to false');
       setLoading(false);
     }
   };

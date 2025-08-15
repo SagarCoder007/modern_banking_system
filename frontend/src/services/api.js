@@ -45,14 +45,25 @@ api.interceptors.request.use(
 // Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => {
+    console.log('🌐 API Interceptor: Response received:', response.status, response.config.url);
     return response;
   },
   (error) => {
+    console.log('🌐 API Interceptor: Error intercepted:', error.response?.status, error.config?.url);
     // Enhanced error handling
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      removeToken();
-      window.location.href = '/login';
+      console.log('🌐 API Interceptor: 401 Unauthorized - checking if this is login attempt');
+      // Only redirect to login if we're not already on login page or making login request
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      const isOnLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
+      
+      if (!isLoginRequest && !isOnLoginPage) {
+        console.log('🌐 API Interceptor: Redirecting to login due to 401 (not login attempt)');
+        removeToken();
+        window.location.href = '/login';
+      } else {
+        console.log('🌐 API Interceptor: 401 on login attempt or already on login page - not redirecting');
+      }
     } else if (error.response?.status === 403) {
       // Forbidden - insufficient permissions
       console.error('Access denied:', error.response.data.message);

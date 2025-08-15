@@ -64,8 +64,51 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     console.log('🔄 Frontend: Form submitted - preventing default');
-    e.preventDefault();
-    e.stopPropagation();
+    
+    // Prevent form submission (React synthetic events)
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Note: stopImmediatePropagation is not available in React synthetic events
+    }
+    
+    // Use the same login logic
+    return await performLogin();
+  };
+
+  const fillDemoCredentials = () => {
+    if (tab === 0) {
+      // Customer demo credentials
+      setFormData({
+        username: 'customer1',
+        password: 'password123'
+      });
+    } else {
+      // Banker demo credentials
+      setFormData({
+        username: 'banker1',
+        password: 'password123'
+      });
+    }
+    setError('');
+  };
+
+  // Alternative login handler that bypasses form submission
+  const handleLoginClick = async (e) => {
+    console.log('🖱️  Frontend: Direct login button clicked');
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // Perform login without form submission
+    await performLogin();
+  };
+
+  // Extracted login logic without form event dependency
+  const performLogin = async () => {
+    console.log('🔄 Frontend: Performing login...');
+    console.log('🔄 Frontend: Current URL before login attempt:', window.location.href);
     
     // Additional validation
     if (!formData.username || !formData.password) {
@@ -103,6 +146,7 @@ const LoginPage = () => {
         password: formData.password
       });
       console.log('📥 Frontend: Login response:', result);
+      console.log('📍 Frontend: Current URL after login response:', window.location.href);
       
       if (result.success && result.user) {
         console.log('✅ Frontend: Login successful, redirecting user:', result.user.username);
@@ -111,44 +155,36 @@ const LoginPage = () => {
           ? '/customer/dashboard' 
           : '/banker/dashboard';
         
+        console.log('🔄 Frontend: Navigating to:', redirectTo);
         // Small delay to ensure state is updated
         setTimeout(() => {
           navigate(redirectTo, { replace: true });
         }, 100);
       } else {
         console.log('❌ Frontend: Login failed with message:', result.message);
+        console.log('❌ Frontend: Staying on login page, setting error message');
         setError(result.message || 'Invalid username or password');
-        // Ensure form doesn't submit
+        setLoading(false);
+        
+        // Explicitly prevent any navigation
+        console.log('🛑 Frontend: Preventing any page refresh or navigation');
         return false;
       }
     } catch (error) {
       console.error('❌ Frontend: Login error:', error);
+      console.log('❌ Frontend: Handling login error, staying on page');
       setError('Connection error. Please check your internet and try again.');
-      // Ensure form doesn't submit
+      setLoading(false);
+      
+      // Explicitly prevent any navigation
+      console.log('🛑 Frontend: Preventing any page refresh or navigation due to error');
       return false;
     } finally {
-      setLoading(false);
+      console.log('🏁 Frontend: Login attempt completed');
+      console.log('📍 Frontend: Final URL:', window.location.href);
     }
     
-    // Ensure form doesn't submit
-    return false;
-  };
-
-  const fillDemoCredentials = () => {
-    if (tab === 0) {
-      // Customer demo credentials
-      setFormData({
-        username: 'customer1',
-        password: 'password123'
-      });
-    } else {
-      // Banker demo credentials
-      setFormData({
-        username: 'banker1',
-        password: 'password123'
-      });
-    }
-    setError('');
+    return true;
   };
 
   return (
@@ -224,8 +260,8 @@ const LoginPage = () => {
                 />
               </Tabs>
 
-              {/* Login Form */}
-              <form onSubmit={handleSubmit} noValidate>
+              {/* Login Form - Using div instead of form to prevent any submission */}
+              <div>
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>
                     {error}
@@ -258,6 +294,13 @@ const LoginPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleInputChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      console.log('⌨️  Frontend: Enter key pressed');
+                      e.preventDefault();
+                      handleLoginClick(e);
+                    }
+                  }}
                   margin="normal"
                   variant="outlined"
                   required
@@ -277,18 +320,12 @@ const LoginPage = () => {
                 />
 
                 <Button
-                  type="submit"
+                  type="button"
                   fullWidth
                   variant="contained"
                   size="large"
                   disabled={loading}
-                  onClick={(e) => {
-                    console.log('🖱️  Frontend: Login button clicked');
-                    if (loading) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                  }}
+                  onClick={handleLoginClick}
                   sx={{
                     mt: 3,
                     mb: 2,
@@ -344,7 +381,7 @@ const LoginPage = () => {
                     )}
                   </Typography>
                 </Box>
-              </form>
+              </div>
             </CardContent>
           </Paper>
         </Fade>
